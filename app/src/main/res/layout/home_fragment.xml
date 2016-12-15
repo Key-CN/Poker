@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="选择您要记录的游戏"
+        android:textSize="24sp" />
+
+    <net.qjkj.poker.widget.KeyRadioGroupV1
+        android:id="@+id/krg_home_fmt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_gandengyan_home_fmt"
+                style="@style/radio_button"
+                android:text="干瞪眼" />
+
+            <RadioButton
+                android:id="@+id/rb_shuangkou_home_fmt"
+                style="@style/radio_button"
+                android:text="双扣" />
+
+            <RadioButton
+                android:id="@+id/rb_majiang_home_fmt"
+                style="@style/radio_button"
+                android:text="麻将" />
+
+        </LinearLayout>
+
+    </net.qjkj.poker.widget.KeyRadioGroupV1>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="44dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择参与游戏的玩家"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/b_add_home_fmt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="增"
+            />
+
+        <Button
+            android:id="@+id/b_delete_home_fmt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="删"
+            />
+
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/gv_home_fmt"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:numColumns="3">
+
+    </GridView>
+
+    <Button
+        android:id="@+id/b_play_home_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:paddingLeft="30sp"
+        android:paddingRight="30dp"
+        android:text="开始游戏"
+        android:textSize="20sp" />
+
+</LinearLayout>

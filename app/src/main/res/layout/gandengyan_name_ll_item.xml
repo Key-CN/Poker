@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_name_ll_item_gandengyan"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="三个汉字"
+        android:gravity="center"
+        style="@style/tv_gandengyan_recycler_header"
+        />
+
+</LinearLayout>
