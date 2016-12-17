@@ -17,7 +17,7 @@ import com.orhanobut.logger.Logger;
 import net.qjkj.poker.BaseFragment;
 import net.qjkj.poker.PokerApplication;
 import net.qjkj.poker.R;
-import net.qjkj.poker.data.PlayerInfo;
+import net.qjkj.poker.data.RealmPlayerInfo;
 import net.qjkj.poker.gandengyan.ui.GanDengYanActivity;
 import net.qjkj.poker.home.IHomeContract;
 import net.qjkj.poker.home.adapter.HomeGridViewAdapter;
@@ -219,15 +219,15 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
     }
 
     @Override
-    public void updatePlayers(List<PlayerInfo> playerInfoList) {
+    public void updatePlayers(List<RealmPlayerInfo> realmPlayerInfoList) {
         //GridView适配器
-        homeGridViewAdapter = new HomeGridViewAdapter(mContext, playerInfoList);
+        homeGridViewAdapter = new HomeGridViewAdapter(mContext, realmPlayerInfoList);
         gv_home_fmt.setAdapter(homeGridViewAdapter);
     }
 
     @Override
-    public void updateAdapter(List<PlayerInfo> playerInfoList) {
-        homeGridViewAdapter.refresh(playerInfoList);
+    public void updateAdapter(List<RealmPlayerInfo> realmPlayerInfoList) {
+        homeGridViewAdapter.refresh(realmPlayerInfoList);
         Logger.d(PokerApplication.checkedPlayers);
     }
 

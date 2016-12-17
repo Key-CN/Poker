@@ -1,6 +1,6 @@
 package net.qjkj.poker.home;
 
-import net.qjkj.poker.data.PlayerInfo;
+import net.qjkj.poker.data.RealmPlayerInfo;
 import net.qjkj.poker.data.source.IPokerDataSource;
 import net.qjkj.poker.data.source.PokerRepository;
 
@@ -43,8 +43,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void getPlayerInfoList() {
         mPokerRepository.getPlayers(new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<PlayerInfo> playerInfoList) {
-                mHomeView.updatePlayers(playerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
+                mHomeView.updatePlayers(realmPlayerInfoList);
             }
         });
     }
@@ -57,8 +57,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void addPlayer(String playerName) {
         mPokerRepository.addPlayer(playerName, new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<PlayerInfo> playerInfoList) {
-                mHomeView.updateAdapter(playerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
+                mHomeView.updateAdapter(realmPlayerInfoList);
             }
         });
     }
@@ -70,8 +70,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void deletePlayers() {
         mPokerRepository.deletePlayers(new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<PlayerInfo> playerInfoList) {
-                mHomeView.updateAdapter(playerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
+                mHomeView.updateAdapter(realmPlayerInfoList);
             }
         });
     }

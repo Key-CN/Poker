@@ -15,6 +15,6 @@ import dagger.Component;
 @Component(dependencies = IPokerRepositoryComponent.class, modules = GanDengYanPresenterModule.class)
 public interface IGanDengYanComponent {
 
-    void inject(GanDengYanActivity activity);
+    void inject(GanDengYanActivity ganDengYanActivity);
 
 }

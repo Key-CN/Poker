@@ -2,7 +2,7 @@ package net.qjkj.poker.data.source;
 
 import android.support.annotation.NonNull;
 
-import net.qjkj.poker.data.PlayerInfo;
+import net.qjkj.poker.data.RealmPlayerInfo;
 
 import java.util.List;
 
@@ -20,9 +20,9 @@ public interface IPokerDataSource {
     interface LoadPlayersCallback {
         /**
          * 回调游戏人员名单集合
-         * @param playerInfoList
+         * @param realmPlayerInfoList
          */
-        void onPlayersLoaded(List<PlayerInfo> playerInfoList);
+        void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList);
 
     }
 

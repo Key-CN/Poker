@@ -3,7 +3,8 @@ package net.qjkj.poker;
 import android.app.Application;
 import android.content.Context;
 
-import net.qjkj.poker.data.PlayerInfo;
+import net.qjkj.poker.data.RealmPlayerInfo;
+import net.qjkj.poker.data.RoundInfo;
 import net.qjkj.poker.data.source.DaggerIPokerRepositoryComponent;
 import net.qjkj.poker.data.source.IPokerRepositoryComponent;
 
@@ -30,12 +31,15 @@ public class PokerApplication extends Application {
 
     public static List<String> checkedPlayers;
 
+    public static RoundInfo roundInfo;
+
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
 
         checkedPlayers = new ArrayList<>();
+        roundInfo = new RoundInfo();
 
         // Realm 初始化
         // Call `Realm.init(Context)` before creating a RealmConfiguration
@@ -45,7 +49,8 @@ public class PokerApplication extends Application {
 
         // 不能自动增长的主键，所以要记录下
         Realm realm = Realm.getDefaultInstance();
-        playerInfoPrimaryKeyValue = new AtomicLong(realm.where(PlayerInfo.class).max("playerId").longValue());
+        Number playerId = realm.where(RealmPlayerInfo.class).max("playerId");
+        playerInfoPrimaryKeyValue = new AtomicLong(playerId == null ? 0 : playerId.longValue());
         realm.close(); //用完一定要关闭
 
         // dagger2

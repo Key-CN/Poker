@@ -3,7 +3,7 @@ package net.qjkj.poker.data.source;
 import android.support.annotation.NonNull;
 
 import net.qjkj.poker.PokerApplication;
-import net.qjkj.poker.data.PlayerInfo;
+import net.qjkj.poker.data.RealmPlayerInfo;
 
 import java.util.List;
 
@@ -37,8 +37,8 @@ public class PokerRepository implements IPokerDataSource {
         checkNotNull(callback);
         mPokerLocalDataSource.getPlayers(new LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<PlayerInfo> playerInfoList) {
-                callback.onPlayersLoaded(playerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
+                callback.onPlayersLoaded(realmPlayerInfoList);
             }
         });
     }
