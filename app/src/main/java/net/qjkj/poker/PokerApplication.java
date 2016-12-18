@@ -4,12 +4,10 @@ import android.app.Application;
 import android.content.Context;
 
 import net.qjkj.poker.data.RealmPlayerInfo;
-import net.qjkj.poker.data.RoundInfo;
+import net.qjkj.poker.data.RealmRoundInfo;
 import net.qjkj.poker.data.source.DaggerIPokerRepositoryComponent;
 import net.qjkj.poker.data.source.IPokerRepositoryComponent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.realm.Realm;
@@ -29,17 +27,13 @@ public class PokerApplication extends Application {
     // player表主键
     public static AtomicLong playerInfoPrimaryKeyValue;
 
-    public static List<String> checkedPlayers;
-
-    public static RoundInfo roundInfo;
+    public static RealmRoundInfo realmRoundInfo = new RealmRoundInfo();
 
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
 
-        checkedPlayers = new ArrayList<>();
-        roundInfo = new RoundInfo();
 
         // Realm 初始化
         // Call `Realm.init(Context)` before creating a RealmConfiguration
@@ -62,5 +56,7 @@ public class PokerApplication extends Application {
     public IPokerRepositoryComponent getIPokerRepositoryComponent() {
         return mIPokerRepositoryComponent;
     }
+
+
 
 }

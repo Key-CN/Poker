@@ -43,8 +43,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void getPlayerInfoList() {
         mPokerRepository.getPlayers(new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
-                mHomeView.updatePlayers(realmPlayerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+                mHomeView.updatePlayers(copyRealmPlayerInfos);
             }
         });
     }
@@ -57,8 +57,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void addPlayer(String playerName) {
         mPokerRepository.addPlayer(playerName, new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
-                mHomeView.updateAdapter(realmPlayerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+                mHomeView.updateAdapter(copyRealmPlayerInfos);
             }
         });
     }
@@ -70,8 +70,8 @@ public final class HomePresenter implements IHomeContract.Presenter {
     public void deletePlayers() {
         mPokerRepository.deletePlayers(new IPokerDataSource.LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
-                mHomeView.updateAdapter(realmPlayerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+                mHomeView.updateAdapter(copyRealmPlayerInfos);
             }
         });
     }

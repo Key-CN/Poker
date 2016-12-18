@@ -17,10 +17,10 @@ public interface IHomeContract {
     interface View extends IBaseView<Presenter> {
 
         /** 更新 GridView ,第一次 setAdapter */
-        void updatePlayers(List<RealmPlayerInfo> realmPlayerInfoList);
+        void updatePlayers(List<RealmPlayerInfo> copyRealmPlayerInfos);
 
         /** 更新 GridView， 后续，刷新adapter notify */
-        void updateAdapter(List<RealmPlayerInfo> realmPlayerInfoList);
+        void updateAdapter(List<RealmPlayerInfo> copyRealmPlayerInfos);
 
     }
 

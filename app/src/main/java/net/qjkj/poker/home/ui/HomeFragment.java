@@ -168,12 +168,12 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
             @Override
             public void onClick(View view) {
                 // 获取游戏人员
-                Logger.d(PokerApplication.checkedPlayers.toString());
+                Logger.d(PokerApplication.realmRoundInfo.getPlayerNameList().toString());
                 // 选择游戏
                 int id = krg_home_fmt.getCheckedRadioButtonId();
                 switch(id) {
                     case R.id.rb_gandengyan_home_fmt:
-                        if (PokerApplication.checkedPlayers.size() >= 2) {
+                        if (PokerApplication.realmRoundInfo.getRealmPlayerInfoList().size() >= 2) {
                             startActivity(new Intent(mContext, GanDengYanActivity.class));
                         } else {
                             ToastUtils.getToast(mContext, "干瞪眼最少两个人才能玩嘛！>_<");
@@ -219,16 +219,15 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
     }
 
     @Override
-    public void updatePlayers(List<RealmPlayerInfo> realmPlayerInfoList) {
+    public void updatePlayers(List<RealmPlayerInfo> copyRealmPlayerInfos) {
         //GridView适配器
-        homeGridViewAdapter = new HomeGridViewAdapter(mContext, realmPlayerInfoList);
+        homeGridViewAdapter = new HomeGridViewAdapter(mContext, copyRealmPlayerInfos);
         gv_home_fmt.setAdapter(homeGridViewAdapter);
     }
 
     @Override
-    public void updateAdapter(List<RealmPlayerInfo> realmPlayerInfoList) {
-        homeGridViewAdapter.refresh(realmPlayerInfoList);
-        Logger.d(PokerApplication.checkedPlayers);
+    public void updateAdapter(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+        homeGridViewAdapter.refresh(copyRealmPlayerInfos);
     }
 
     /**

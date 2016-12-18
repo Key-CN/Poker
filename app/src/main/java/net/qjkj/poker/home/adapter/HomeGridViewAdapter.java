@@ -5,7 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
+
+import com.orhanobut.logger.Logger;
 
 import net.qjkj.poker.PokerApplication;
 import net.qjkj.poker.R;
@@ -25,15 +26,15 @@ import butterknife.ButterKnife;
 public class HomeGridViewAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<RealmPlayerInfo> realmPlayerInfoList;
+    private List<RealmPlayerInfo> copyRealmPlayerInfos;
 
-    public HomeGridViewAdapter(Context mContext, List<RealmPlayerInfo> realmPlayerInfoList) {
+    public HomeGridViewAdapter(Context mContext, List<RealmPlayerInfo> copyRealmPlayerInfos) {
         this.mContext = mContext;
-        this.realmPlayerInfoList = realmPlayerInfoList;
+        this.copyRealmPlayerInfos = copyRealmPlayerInfos;
     }
 
-    public void refresh(List<RealmPlayerInfo> realmPlayerInfoList) {
-        this.realmPlayerInfoList = realmPlayerInfoList;
+    public void refresh(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+        this.copyRealmPlayerInfos = copyRealmPlayerInfos;
         // 刷新时清空下集合，其实不清也没bug，因为监听里写了移除，但是还是要防止意外，毕竟还没写记住CheckBox状态
 //        PokerApplication.checkedPlayers.clear();
         notifyDataSetChanged();
@@ -41,12 +42,12 @@ public class HomeGridViewAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return realmPlayerInfoList.size();
+        return copyRealmPlayerInfos.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return position;
+    public RealmPlayerInfo getItem(int position) {
+        return copyRealmPlayerInfos.get(position);
     }
 
     @Override
@@ -64,26 +65,42 @@ public class HomeGridViewAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        final String playerName = realmPlayerInfoList.get(position).getPlayerName();
+        final RealmPlayerInfo realmPlayerInfo = getItem(position);
 
-        viewHolder.cb_home_gridview_item.setText(playerName);
+        viewHolder.cb_home_gridview_item.setText(realmPlayerInfo.getPlayerName());
         //复选框读取
-//        viewHolder.cb_home_gridview_item.setChecked(realmPlayerInfoList.get(position).isChecked());
+        viewHolder.cb_home_gridview_item.setChecked(realmPlayerInfo.isChecked());
 
-        viewHolder.cb_home_gridview_item.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        viewHolder.cb_home_gridview_item.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
+            public void onClick(View v) {
                 //复选框记忆
-
-                if (isChecked) {
-                    PokerApplication.checkedPlayers.add(playerName);
-                    PokerApplication.roundInfo.addPlayerInfo(realmPlayerInfoList.get(position));
+                realmPlayerInfo.setChecked(!realmPlayerInfo.isChecked());
+                Logger.d("checked:" + copyRealmPlayerInfos.get(position).isChecked() + "----position:"+position);
+                if (realmPlayerInfo.isChecked()) {
+                    PokerApplication.realmRoundInfo.addPlayerInfo(realmPlayerInfo);
                 } else {
-                    PokerApplication.checkedPlayers.remove(playerName);
-                    PokerApplication.roundInfo.removePlayerInfo(realmPlayerInfoList.get(position));
+                    PokerApplication.realmRoundInfo.removePlayerInfo(realmPlayerInfo);
                 }
             }
         });
+
+        // 复用时会出错，滑动时会自动更改其他position的isChecked
+/*        viewHolder.cb_home_gridview_item.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                //复选框记忆
+                copyRealmPlayerInfos.get(position).setChecked(isChecked);
+                Logger.d("checked:" + copyRealmPlayerInfos.get(position).isChecked() + "----position:"+position);
+                if (isChecked) {
+                    PokerApplication.realmRoundInfo.addPlayerInfo(realmPlayerInfo);
+                } else {
+                    PokerApplication.realmRoundInfo.removePlayerInfo(realmPlayerInfo);
+
+                }
+            }
+        });*/
+
         return convertView;
     }
 

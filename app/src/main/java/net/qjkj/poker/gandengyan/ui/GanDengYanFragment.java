@@ -110,7 +110,7 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
 
         // 计算分数的Recycler填充
         rv_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext));
-        rv_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_recyclerview_item, PokerApplication.checkedPlayers) {
+        rv_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_recyclerview_item, PokerApplication.realmRoundInfo.getPlayerNameList()) {
             @Override
             protected void convert(final ViewHolder holder, String s, int position) {
                 holder.setText(R.id.tv_name_gandengyan_recycler_item, s);
@@ -164,7 +164,7 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
 
         // 姓名表填充
         rv_namelist_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        rv_namelist_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_name_item, PokerApplication.checkedPlayers) {
+        rv_namelist_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_name_item, PokerApplication.realmRoundInfo.getPlayerNameList()) {
             @Override
             protected void convert(ViewHolder holder, String s, int position) {
                 holder.setText(R.id.tv_name_item_gandengyan, s);
@@ -176,7 +176,7 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
         for (int i = 0; i < 100; i++) {
             l.add(i + "");
         }
-        rv_scorelist_gandengyan_fmt.setLayoutManager(new GridLayoutManager(mContext, PokerApplication.checkedPlayers.size()));
+        rv_scorelist_gandengyan_fmt.setLayoutManager(new GridLayoutManager(mContext, PokerApplication.realmRoundInfo.getRealmPlayerInfoList().size()));
         DividerItemDecoration decor = new DividerItemDecoration(mContext, GridLayoutManager.HORIZONTAL);
 
         rv_scorelist_gandengyan_fmt.addItemDecoration(decor);

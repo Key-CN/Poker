@@ -20,9 +20,9 @@ public interface IPokerDataSource {
     interface LoadPlayersCallback {
         /**
          * 回调游戏人员名单集合
-         * @param realmPlayerInfoList
+         * @param copyRealmPlayerInfos 已经从Realm对象copyFrom为普通对象
          */
-        void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList);
+        void onPlayersLoaded(List<RealmPlayerInfo> copyRealmPlayerInfos);
 
     }
 

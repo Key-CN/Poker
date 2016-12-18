@@ -11,6 +11,7 @@ import net.qjkj.poker.data.source.IPokerDataSource;
 import net.qjkj.poker.util.ToastUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Singleton;
@@ -28,8 +29,12 @@ import static dagger.internal.Preconditions.checkNotNull;
 @Singleton
 public class PokerLocalDataSource implements IPokerDataSource {
 
-    private Realm mRealm;
     private Context mContext;
+
+    /**
+     * 选手缓存数据
+     */
+    private List<RealmPlayerInfo> copyRealmPlayerInfos = new ArrayList<>();
 
     public PokerLocalDataSource(@NonNull Context context) {
         mContext = checkNotNull(context);
@@ -43,28 +48,27 @@ public class PokerLocalDataSource implements IPokerDataSource {
     @Override
     public void getPlayers(@NonNull LoadPlayersCallback callback) {
         checkNotNull(callback);
-
+        // 每次加载界面的时候刷新数据
+        copyRealmPlayerInfos.clear();
         // 查数据库获取数据
-        mRealm = Realm.getDefaultInstance();
-        try {
-            RealmResults<RealmPlayerInfo> realmPlayerInfos = mRealm.where(RealmPlayerInfo.class).findAll();
-
-            // 回传
-            if (realmPlayerInfos.isEmpty()) {
-                // 如果为空就创建四个默认选手
-                List<RealmPlayerInfo> list = new ArrayList<>();
-                for (int i = 0; i < 4; i++) {
-                    list.add(new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), "选手" + i));
+        try (Realm realm = Realm.getDefaultInstance()) {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    RealmResults<RealmPlayerInfo> realmPlayerInfos = realm.where(RealmPlayerInfo.class).findAll();
+                    if (realmPlayerInfos.isEmpty()) {
+                        for (int i = 0; i < 4; i++) {
+                            copyRealmPlayerInfos.add(new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), "选手" + i));
+                        }
+                        realm.insert(copyRealmPlayerInfos);
+                    } else {
+                        copyRealmPlayerInfos.addAll(realm.copyFromRealm(realmPlayerInfos));
+                    }
                 }
-                callback.onPlayersLoaded(list);
-            } else {
-                // 如果不为空，回调
-                callback.onPlayersLoaded(realmPlayerInfos);
-                Logger.d(realmPlayerInfos.toString());
-            }
-        } finally {
-            mRealm.close();
+            });
         }
+        Logger.d(copyRealmPlayerInfos.toString());
+        callback.onPlayersLoaded(copyRealmPlayerInfos);
     }
 
     /**
@@ -74,21 +78,23 @@ public class PokerLocalDataSource implements IPokerDataSource {
      * @param callback   用户刷新界面的回调数据
      */
     @Override
-    public void addPlayer(String playerName, @NonNull LoadPlayersCallback callback) {
+    public void addPlayer(final String playerName, @NonNull LoadPlayersCallback callback) {
         checkNotNull(callback);
 
         // 添加到数据库
         // minSdkVersion >= 19 and Java >= 7 这样写 无需手动关闭Realm实例
         try (Realm mRealm = Realm.getDefaultInstance()) {
-            // 开始事务
-            mRealm.beginTransaction();
-            // 执行Realm方法
-            mRealm.insert(new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), playerName));
-            // 提交事务
-            mRealm.commitTransaction();
-            ToastUtils.getToast(mContext, playerName + "  已添加");
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    RealmPlayerInfo realmPlayerInfo = new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), playerName);
+                    realm.insert(realmPlayerInfo);
+                    copyRealmPlayerInfos.add(realmPlayerInfo);
+                }
+            });
         }
-
+        ToastUtils.getToast(mContext, playerName + "  已添加");
+        callback.onPlayersLoaded(copyRealmPlayerInfos);
 /*        try {
 
         } catch (Exception e) {
@@ -101,7 +107,7 @@ public class PokerLocalDataSource implements IPokerDataSource {
         mRealm.close();*/
 
         // 把全部选手的list放进回调
-        getPlayers(callback);
+//        getPlayers(callback);  //现在只需要把单个添加的放进去就好了
     }
 
     /**
@@ -114,18 +120,26 @@ public class PokerLocalDataSource implements IPokerDataSource {
         checkNotNull(callback);
 
         // 从数据库中删除,先拿实例
-        mRealm = Realm.getDefaultInstance();
-
-        try {
+        try (Realm mRealm = Realm.getDefaultInstance()) {
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    RealmResults<RealmPlayerInfo> players = realm.where(RealmPlayerInfo.class).in("playerName", PokerApplication.realmRoundInfo.getPlayerNameArray()).findAll();
+                    players.deleteAllFromRealm();
+                    ToastUtils.getToast(mContext, Arrays.toString(PokerApplication.realmRoundInfo.getPlayerNameArray()) + "  已删除");
+                }
+            });
+        }
+        copyRealmPlayerInfos.removeAll(PokerApplication.realmRoundInfo.getRealmPlayerInfoList());
+        callback.onPlayersLoaded(copyRealmPlayerInfos);
+/*        try {
             mRealm.beginTransaction();
-            String[] playerNames = PokerApplication.checkedPlayers.toArray(new String[PokerApplication.checkedPlayers.size()]);
-            Logger.d(playerNames);
-            RealmResults<RealmPlayerInfo> players = mRealm.where(RealmPlayerInfo.class).in("playerName", playerNames).findAll();
-            Logger.d(players.toArray());
+            RealmResults<RealmPlayerInfo> players = mRealm.where(RealmPlayerInfo.class).in("playerName", PokerApplication.roundInfo.getPlayerNameArray()).findAll();
+            Logger.d(players);
             boolean b = players.deleteAllFromRealm();
             mRealm.commitTransaction();
             if (b) {
-                ToastUtils.getToast(mContext, PokerApplication.checkedPlayers.toString() + "  已删除");
+                ToastUtils.getToast(mContext, Arrays.toString(PokerApplication.roundInfo.getPlayerNameArray()) + "  已删除");
             } else {
                 ToastUtils.getToast(mContext, "删除失败");
             }
@@ -135,9 +149,13 @@ public class PokerLocalDataSource implements IPokerDataSource {
             ToastUtils.getToast(mContext, "删除失败");
         } finally {
             mRealm.close();
-        }
+        }*/
+        // 也可以把每个对象单独从集合中移除。但是我希望重新加载一边。以保证准确性
+//        playerInfoList.removeAll(PokerApplication.roundInfo.getPlayerInfoList());
+//        callback.onPlayersLoaded(playerInfoList);
         // 把全部选手的list放进回调
-        getPlayers(callback);
+//        playerInfoList.clear();
+//        getPlayers(callback);
     }
 
 }

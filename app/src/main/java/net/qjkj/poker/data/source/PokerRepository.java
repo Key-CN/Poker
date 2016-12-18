@@ -37,8 +37,8 @@ public class PokerRepository implements IPokerDataSource {
         checkNotNull(callback);
         mPokerLocalDataSource.getPlayers(new LoadPlayersCallback() {
             @Override
-            public void onPlayersLoaded(List<RealmPlayerInfo> realmPlayerInfoList) {
-                callback.onPlayersLoaded(realmPlayerInfoList);
+            public void onPlayersLoaded(List<RealmPlayerInfo> copyRealmPlayerInfos) {
+                callback.onPlayersLoaded(copyRealmPlayerInfos);
             }
         });
     }

@@ -1,5 +1,6 @@
 package net.qjkj.poker.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.RealmList;
@@ -12,7 +13,7 @@ import io.realm.annotations.PrimaryKey;
  * description:
  */
 
-public class RoundInfo  extends RealmObject {
+public class RealmRoundInfo extends RealmObject {
 
     @PrimaryKey
     private long roundId;
@@ -20,7 +21,7 @@ public class RoundInfo  extends RealmObject {
 
     private RealmList<RealmPlayerInfo> realmPlayerInfoList = new RealmList<>();
 
-    public RoundInfo() {
+    public RealmRoundInfo() {
     }
 
     public long getRoundId() {
@@ -45,5 +46,26 @@ public class RoundInfo  extends RealmObject {
 
     public void removePlayerInfo(RealmPlayerInfo realmPlayerInfo) {
         realmPlayerInfoList.remove(realmPlayerInfo);
+    }
+
+    public void removeAll() {
+        realmPlayerInfoList.clear();
+    }
+
+    public List<String> getPlayerNameList() {
+        List<String> names = new ArrayList<>();
+        for (RealmPlayerInfo realmPlayerInfo : realmPlayerInfoList) {
+            names.add(realmPlayerInfo.getPlayerName());
+        }
+        return names;
+    }
+
+    public String[] getPlayerNameArray() {
+        int size = realmPlayerInfoList.size();
+        String[] names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names[i] = realmPlayerInfoList.get(i).getPlayerName();
+        }
+        return names;
     }
 }
