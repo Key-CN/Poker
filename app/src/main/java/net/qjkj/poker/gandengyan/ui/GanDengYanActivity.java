@@ -6,14 +6,22 @@ import android.support.v4.app.Fragment;
 import net.qjkj.poker.BaseActivity;
 import net.qjkj.poker.PokerApplication;
 import net.qjkj.poker.R;
+import net.qjkj.poker.data.RealmGameInfo;
+import net.qjkj.poker.data.RealmRoundInfo;
 import net.qjkj.poker.gandengyan.DaggerIGanDengYanComponent;
+import net.qjkj.poker.gandengyan.GanDengYanPresenter;
 import net.qjkj.poker.gandengyan.GanDengYanPresenterModule;
 import net.qjkj.poker.gandengyan.IGanDengYanContract;
 import net.qjkj.poker.util.ActivityUtils;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 public class GanDengYanActivity extends BaseActivity {
+
+    @Inject
+    GanDengYanPresenter mGanDengYanPresenter;
 
     /**
      * fragment的集合
@@ -35,6 +43,12 @@ public class GanDengYanActivity extends BaseActivity {
      */
     @Override
     protected void initLayout(Bundle savedInstanceState) {
+
+        // 创建一局游戏，并且把创建时间作为主键存入，这样也可以知道什么时候开始游戏的。并且同时创建第一盘游戏，作用储存总分的作用
+        PokerApplication.realmGameInfo = new RealmGameInfo(new RealmRoundInfo(PokerApplication.checkedPlayerList, System.currentTimeMillis()));
+
+        // 创建一盘游戏，实际数据库中是第二盘，因为第一盘是总分
+        PokerApplication.realmRoundInfo = new RealmRoundInfo(PokerApplication.checkedPlayerList);
 
         //初始化fragment集合
         if (mFragmentList == null || mFragmentList.size() != 1) {

@@ -35,8 +35,6 @@ public class HomeGridViewAdapter extends BaseAdapter {
 
     public void refresh(List<RealmPlayerInfo> copyRealmPlayerInfos) {
         this.copyRealmPlayerInfos = copyRealmPlayerInfos;
-        // 刷新时清空下集合，其实不清也没bug，因为监听里写了移除，但是还是要防止意外，毕竟还没写记住CheckBox状态
-//        PokerApplication.checkedPlayers.clear();
         notifyDataSetChanged();
     }
 
@@ -78,9 +76,9 @@ public class HomeGridViewAdapter extends BaseAdapter {
                 realmPlayerInfo.setChecked(!realmPlayerInfo.isChecked());
                 Logger.d("checked:" + copyRealmPlayerInfos.get(position).isChecked() + "----position:"+position);
                 if (realmPlayerInfo.isChecked()) {
-                    PokerApplication.realmRoundInfo.addPlayerInfo(realmPlayerInfo);
+                    PokerApplication.checkedPlayerList.add(realmPlayerInfo);
                 } else {
-                    PokerApplication.realmRoundInfo.removePlayerInfo(realmPlayerInfo);
+                    PokerApplication.checkedPlayerList.remove(realmPlayerInfo);
                 }
             }
         });

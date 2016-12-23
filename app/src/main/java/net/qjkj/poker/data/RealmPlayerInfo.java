@@ -1,7 +1,7 @@
 package net.qjkj.poker.data;
 
 import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Ignore;
 import io.realm.annotations.Required;
 
 /**
@@ -15,28 +15,15 @@ public class RealmPlayerInfo extends RealmObject {
     public RealmPlayerInfo() {
     }
 
-    public RealmPlayerInfo(long playerId, String playerName) {
-        this.playerId = playerId;
+    public RealmPlayerInfo(String playerName) {
         this.playerName = playerName;
     }
-
-    @PrimaryKey
-    private long playerId;
 
     @Required
     private String playerName;
 
-    private int remain;
-    private int score;
+    @Ignore
     private boolean isChecked;
-
-    public long getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(long playerId) {
-        this.playerId = playerId;
-    }
 
     public String getPlayerName() {
         return playerName;
@@ -54,27 +41,8 @@ public class RealmPlayerInfo extends RealmObject {
         isChecked = checked;
     }
 
-    public int getRemain() {
-        return remain;
-    }
-
-    public void setRemain(int remain) {
-        this.remain = remain;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
     @Override
     public String toString() {
-        return "RealmPlayerInfo{" +
-                "playerId=" + playerId +
-                ", playerName='" + playerName + '\'' +
-                '}';
+        return "称呼: '" + playerName + '\'';
     }
 }

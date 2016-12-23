@@ -66,4 +66,12 @@ public class PokerRepository implements IPokerDataSource {
         checkNotNull(callback);
         mPokerLocalDataSource.deletePlayers(callback);
     }
+
+    /**
+     * 保存一局游戏,在整一盘游戏中
+     */
+    @Override
+    public void saveRoundOnGame() {
+        mPokerLocalDataSource.saveRoundOnGame();
+    }
 }

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import io.realm.RealmList;
 
 /**
  * Created by Key on 2016/11/25 01:17
@@ -34,7 +35,7 @@ import butterknife.BindView;
  * description:
  */
 
-public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmentInteractionListener {
+public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmentInteractionListener, AddDialogFragment.OnAddPlayerListener {
 
     @BindView(R.id.drawerLayout_home_act)
     DrawerLayout drawerLayout_home_act;//act的最外层布局ID
@@ -66,6 +67,10 @@ public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmen
      */
     @Override
     protected void initLayout(Bundle savedInstanceState) {
+
+        // 初始化选择人物的列表
+        PokerApplication.checkedPlayerList = new RealmList<>();
+
         // Set up the toolbar.
         setSupportActionBar(toolbar_home_act);
         ActionBar ab = getSupportActionBar();
@@ -77,6 +82,7 @@ public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmen
         if (navigationView_home_act != null) {
             setupDrawerContent(navigationView_home_act);
         }
+
         //初始化fragment集合
         if (mFragmentList == null || mFragmentList.size() != 1) {
             mFragmentList = new ArrayList<>();
@@ -92,7 +98,6 @@ public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmen
                 .iPokerRepositoryComponent(((PokerApplication) getApplication()).getIPokerRepositoryComponent())
                 .homePresenterModule(new HomePresenterModule(((IHomeContract.View) (mFragmentList.get(0)))))
                 .build().inject(this);
-
     }
 
     /**
@@ -150,5 +155,14 @@ public class HomeActivity extends BaseActivity implements HomeFragment.OnFragmen
     @Override
     public void onFragmentInteraction(String string) {
         Logger.d(string + "----fragment互动接口，回调，fragment调用此方法将会执行子类（也就是本activity）自己重写的方法，意思就是将fragment的参数传回activity，用来更新UI");
+    }
+
+    /**
+     * 已经在dialog里面检查好姓名了。正确的话直接输入数据库
+     * @param playerName
+     */
+    @Override
+    public void onAddPlayer(String playerName) {
+        mHomePresenter.addPlayer(playerName);
     }
 }

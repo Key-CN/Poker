@@ -7,8 +7,6 @@
     android:layout_height="match_parent"
     tools:context="net.qjkj.poker.gandengyan.ui.GanDengYanActivity">
 
-    <include layout="@layout/toolbar" />
-
     <FrameLayout
         android:id="@+id/contentFrame_gandengyan_act"
         android:layout_width="match_parent"

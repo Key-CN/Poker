@@ -1,15 +1,12 @@
 package net.qjkj.poker.home.ui;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
 
 import com.orhanobut.logger.Logger;
@@ -131,27 +128,13 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         // 增加按钮的监听，弹窗增加选手
         b_add_home_fmt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final View view = View.inflate(mContext, R.layout.home_addplayer_editview, null);
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setIcon(R.mipmap.ic_launcher).setTitle("增加新玩家")
-                .setView(view)
-                .setNeutralButton("取消", null)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                            String playerName = ((EditText) view.findViewById(R.id.et_addplayer_editview_home_act)).getText().toString().trim();
-                        if (playerName.isEmpty()) {
-                            ToastUtils.getToast(mContext, "没有名字 人家记不住你嘛! >_<");
-                        } else {
-                            mPresenter.addPlayer(playerName);
-                        }
-                    }
-                })
-                .show();
+                // DialogFragment 优点很多 show
+                new AddDialogFragment().show(getFragmentManager(), "Start Of HomeFragment");
             }
         });
 
@@ -159,7 +142,11 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
         b_delete_home_fmt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.deletePlayers();
+                if (PokerApplication.checkedPlayerList.isEmpty()) {
+                    ToastUtils.getToast(mContext, "请先选择需要删除的玩家");
+                } else {
+                    mPresenter.deletePlayers();
+                }
             }
         });
 
@@ -167,22 +154,7 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
         b_play_home_fragment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 获取游戏人员
-                Logger.d(PokerApplication.realmRoundInfo.getPlayerNameList().toString());
-                // 选择游戏
-                int id = krg_home_fmt.getCheckedRadioButtonId();
-                switch(id) {
-                    case R.id.rb_gandengyan_home_fmt:
-                        if (PokerApplication.realmRoundInfo.getRealmPlayerInfoList().size() >= 2) {
-                            startActivity(new Intent(mContext, GanDengYanActivity.class));
-                        } else {
-                            ToastUtils.getToast(mContext, "干瞪眼最少两个人才能玩嘛！>_<");
-                        }
-                        break;
-                    default:
-                        ToastUtils.getToast(mContext,"暂无");
-                        break;
-                }
+                startGame();
             }
         });
     }
@@ -228,6 +200,25 @@ public class HomeFragment extends BaseFragment implements IHomeContract.View {
     @Override
     public void updateAdapter(List<RealmPlayerInfo> copyRealmPlayerInfos) {
         homeGridViewAdapter.refresh(copyRealmPlayerInfos);
+    }
+
+    /**
+     * 获取游戏人员，获取选择游戏，然后跳转到相应的界面
+     */
+    public void startGame() {
+        int id = krg_home_fmt.getCheckedRadioButtonId();
+        switch (id) {
+            case R.id.rb_gandengyan_home_fmt:
+                if (PokerApplication.checkedPlayerList.size() >= 2) {
+                    startActivity(new Intent(mContext, GanDengYanActivity.class));
+                } else {
+                    ToastUtils.getToast(mContext, "干瞪眼最少两个人才能玩嘛！>_<");
+                }
+                break;
+            default:
+                ToastUtils.getToast(mContext, "暂无");
+                break;
+        }
     }
 
     /**

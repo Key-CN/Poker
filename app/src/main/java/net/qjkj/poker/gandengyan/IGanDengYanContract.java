@@ -12,10 +12,16 @@ import net.qjkj.poker.IBaseView;
 public interface IGanDengYanContract {
 
     interface View extends IBaseView<Presenter> {
-
+        /**
+         * 属性得分表数据
+         */
+        void updateScore();
     }
 
     interface Presenter extends IBasePresenter {
-
+        /**
+         * 保存一局游戏
+         */
+        void saveRound();
     }
 }

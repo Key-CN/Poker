@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -20,11 +21,10 @@ import com.zhy.adapter.recyclerview.base.ViewHolder;
 import net.qjkj.poker.BaseFragment;
 import net.qjkj.poker.PokerApplication;
 import net.qjkj.poker.R;
+import net.qjkj.poker.data.RealmPlayerScoreInfo;
 import net.qjkj.poker.gandengyan.IGanDengYanContract;
+import net.qjkj.poker.gandengyan.adapter.ScoreAdapterN;
 import net.qjkj.poker.util.ToastUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 
@@ -47,12 +47,24 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
     RecyclerView rv_namelist_gandengyan_fmt;
     @BindView(R.id.b_save_gandengyan_fmt)
     Button b_save_gandengyan_fmt; //保存进入下一局
+
     @BindView(R.id.tv_boom_gandengyan_fmt)
-    TextView tv_boom_gandengyan_fmt; //炸弹
+    TextView tv_boom_gandengyan_fmt; //炸弹倍数
+
+    @BindView(R.id.iv_minus_gandengyan_fmt)
+    ImageView iv_minus_gandengyan_fmt; //减
+    @BindView(R.id.iv_add_gandengyan_fmt)
+    ImageView iv_add_gandengyan_fmt; //加
+
 
     private PopupWindow popup;
     private View popupContent;
-    private int boom = 1;
+    // 炸弹
+    private int boom = -1;
+    // 记录赢的人的位置
+    private int winnerPosition = -1;
+    // 本次游戏人数，多个地方经常要用
+    private int playerListSize;
 
     public GanDengYanFragment() {
         // 公共空构造
@@ -80,7 +92,7 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
      */
     @Override
     protected void initView(Bundle savedInstanceState) {
-
+        playerListSize = PokerApplication.checkedPlayerList.size();
     }
 
     @Override
@@ -88,18 +100,121 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
         mPresenter = checkNotNull(presenter);
     }
 
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // 计算分数的Recycler填充
+        rv_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext));
+        // adapter
+        rv_gandengyan_fmt.setAdapter(new CommonAdapter<RealmPlayerScoreInfo>(mContext, R.layout.gandengyan_recyclerview_item, PokerApplication.realmRoundInfo.getPlayerScoreList()) {
+
+            private String winner;
+
+            void setWinner() {
+                winner = "0";
+                for (int i = 0; i < playerListSize; i++) {
+                    RealmPlayerScoreInfo scoreInfo = PokerApplication.realmRoundInfo.getPlayerScoreList().get(i);
+                    if (!scoreInfo.getRemain().equals("赢")) {
+                        winner = Integer.parseInt(winner) - Integer.parseInt(scoreInfo.getScore()) + "";
+                    }
+                }
+            }
+
+            @Override
+            protected void convert(final ViewHolder holder, RealmPlayerScoreInfo player, final int position) {
+
+                // 设置监听器
+                holder.setOnClickListener(R.id.tv_remain_gandengyan_recycler_item, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (v.getId()) {
+                            case R.id.b_0_popup:
+                            case R.id.b_1_popup:
+                            case R.id.b_2_popup:
+                            case R.id.b_3_popup:
+                            case R.id.b_4_popup:
+                            case R.id.b_5_popup:
+                                // 记录手牌
+                                String remain = ((TextView) v).getText().toString();
+                                // 计算得分并记录
+                                // String score = Integer.parseInt((remain.equals("5") ? "10" : remain)) * boom + "";
+                                String score = Integer.parseInt(remain) * (remain.equals("5") ? boom * 2 : boom) + "";
+                                setText(remain, score);
+                                popup.dismiss();
+                                break;
+                            default:
+                                popup.showAsDropDown(v);
+                                // 从内部创建监听器，这样可以直接使用holder
+                                // 由于运行顺序的问题。监听器在这里才赋值成功，只能在这里设置监听器
+                                // popup 的监听器
+                                for (int i = 0; i < 6; i++) {
+                                    ((ViewGroup) popupContent).getChildAt(i).setOnClickListener(this);
+                                }
+                                break;
+                        }
+                    }
+
+                    void setText(String remain, String score) {
+
+                        if (winnerPosition == position) {
+                            winnerPosition = -1;
+                        }
+
+                        if (remain.equals("0")) {
+                            remain = "赢";
+                            if (winnerPosition != -1) {
+                                ToastUtils.getToast(mContext,"只能有一个赢家哦！~");
+                                return;
+                            }
+                        }
+
+                        // 储存得分
+                        if (remain.equals("赢")) {
+                            winnerPosition = position;
+                        } else {
+                            PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).setScore(score);
+                        }
+
+                        // 储存剩余手牌数
+                        PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).setRemain(remain);
+
+                        // 储存赢的人的得分
+                        setWinner();
+                        if (winnerPosition != -1) {
+                            PokerApplication.realmRoundInfo.getPlayerScoreList().get(winnerPosition).setScore(winner);
+                            //示赢的人的得分数
+                            notifyItemChanged(winnerPosition);
+                        }
+
+                        // 显示剩余手牌数
+                        // holder.setText(R.id.tv_remain_gandengyan_recycler_item, PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getRemain());
+
+                        // 显示得分
+                        // holder.setText(R.id.tv_score_gandengyan_recycler_item, PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getScore());
+
+                        // 用刷新代替两个显示
+                        notifyItemChanged(position);
+                    }
+                });
+
+                // 设置名字
+                holder.setText(R.id.tv_name_gandengyan_recycler_item, player.getPlayerName());
+
+                // 显示剩余手牌数
+                holder.setText(R.id.tv_remain_gandengyan_recycler_item, PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getRemain());
+
+                // 显示得分
+                holder.setText(R.id.tv_score_gandengyan_recycler_item, PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getScore());
+
+            }
+        });
+
+
         // popup 填充
         // View popupContent = LayoutInflater.from(mContext).inflate(R.layout.gandengyan_popup, null);
         popupContent = View.inflate(mContext, R.layout.gandengyan_popup, null);
-/*        PopupItemOnClickListener popupItemOnClickListener = new PopupItemOnClickListener();
-        for (int i = 0; i < 6; i++) {
-            ((ViewGroup) popupContent).getChildAt(i).setOnClickListener(popupItemOnClickListener);
-        }*/
-
 
         // MATCH_PARENT = -1;   WRAP_CONTENT = -2; 所有的LayoutParams都继承于ViewGroup
         // 如果PopupWindow中有Editor的话，focusable要为true。
@@ -108,111 +223,141 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
         popup.setOutsideTouchable(true);
         popup.setBackgroundDrawable(new ColorDrawable(0));
 
-        // 计算分数的Recycler填充
-        rv_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext));
-        rv_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_recyclerview_item, PokerApplication.realmRoundInfo.getPlayerNameList()) {
-            @Override
-            protected void convert(final ViewHolder holder, String s, int position) {
-                holder.setText(R.id.tv_name_gandengyan_recycler_item, s);
-                holder.setOnClickListener(R.id.tv_remain_gandengyan_recycler_item, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        switch (v.getId()) {
-                            case R.id.b_0_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "赢");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 0 * boom+"");
-                                popup.dismiss();
-                                break;
-                            case R.id.b_1_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "1");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 1 * boom+"");
-                                popup.dismiss();
-                                break;
-                            case R.id.b_2_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "2");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 2 * boom+"");
-                                popup.dismiss();
-                                break;
-                            case R.id.b_3_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "3");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 3 * boom+"");
-                                popup.dismiss();
-                                break;
-                            case R.id.b_4_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "4");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 4 * boom+"");
-                                popup.dismiss();
-                                break;
-                            case R.id.b_5_popup:
-                                holder.setText(R.id.tv_remain_gandengyan_recycler_item, "5");
-                                holder.setText(R.id.tv_score_gandengyan_recycler_item, 5 * boom * 2 +"");
-                                popup.dismiss();
-                                break;
-                            default:
-                                popup.showAsDropDown(v);
-                                for (int i = 0; i < 6; i++) {
-                                    ((ViewGroup) popupContent).getChildAt(i).setOnClickListener(this);
-                                }
-                                break;
-                        }
-
-                        // holder.setText(R.id.tv_score_gandengyan_recycler_item, "");
-                    }
-                });
-            }
-        });
-
-        // 姓名表填充
+        // 得分表名字 填充
         rv_namelist_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        rv_namelist_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_name_item, PokerApplication.realmRoundInfo.getPlayerNameList()) {
+        rv_namelist_gandengyan_fmt.setAdapter(new CommonAdapter<RealmPlayerScoreInfo>(mContext, R.layout.gandengyan_name_item, PokerApplication.realmGameInfo.getRealmRoundInfoList().get(0).getPlayerScoreList()) {
             @Override
-            protected void convert(ViewHolder holder, String s, int position) {
-                holder.setText(R.id.tv_name_item_gandengyan, s);
+            protected void convert(ViewHolder holder, RealmPlayerScoreInfo realmPlayerScoreInfo, int position) {
+                holder.setText(R.id.tv_name_item_gandengyan, realmPlayerScoreInfo.getPlayerName());
+                holder.setText(R.id.tv_total_item_gandengyan, realmPlayerScoreInfo.getScore());
             }
         });
 
-        // 得分表的填充
-        List<String> l = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            l.add(i + "");
-        }
-        rv_scorelist_gandengyan_fmt.setLayoutManager(new GridLayoutManager(mContext, PokerApplication.realmRoundInfo.getRealmPlayerInfoList().size()));
-        DividerItemDecoration decor = new DividerItemDecoration(mContext, GridLayoutManager.HORIZONTAL);
 
-        rv_scorelist_gandengyan_fmt.addItemDecoration(decor);
-        rv_scorelist_gandengyan_fmt.setAdapter(new CommonAdapter<String>(mContext, R.layout.gandengyan_name_item, l) {
+        // 得分表名字的填充
+        rv_scorelist_gandengyan_fmt.setLayoutManager(new GridLayoutManager(mContext, playerListSize));
+
+        // 添加竖的分割线
+        rv_scorelist_gandengyan_fmt.addItemDecoration(new DividerItemDecoration(mContext, GridLayoutManager.HORIZONTAL));
+
+        // 得分表分数的adapter
+        rv_scorelist_gandengyan_fmt.setAdapter(new ScoreAdapterN(mContext));  // 无悬停头
+
+/*        ScoreAdapterX scoreAdapterX = new ScoreAdapterX(mContext);
+        StickyHeaderDecoration stickyHeaderDecoration = new StickyHeaderDecoration(scoreAdapterX);
+        LRecyclerViewAdapter lRecyclerViewAdapter = new LRecyclerViewAdapter(scoreAdapterX);
+
+        rv_scorelist_gandengyan_fmt.setAdapter(lRecyclerViewAdapter);
+        rv_scorelist_gandengyan_fmt.addItemDecoration(stickyHeaderDecoration);*/
+
+
+        // b_save_gandengyan_fmt 保存按钮监听
+        b_save_gandengyan_fmt.setOnClickListener(new View.OnClickListener() {
             @Override
-            protected void convert(ViewHolder holder, String s, int position) {
-                holder.setText(R.id.tv_name_item_gandengyan, s);
+            public void onClick(View v) {
+                if (winnerPosition == -1) {
+                    ToastUtils.getToast(mContext, "必须有一个赢家");
+                    return;
+                }
+                mPresenter.saveRound();
             }
         });
+
+
+        // 炸弹加减
+        BoomOnClickListener boomOnClickListener = new BoomOnClickListener();
+        iv_minus_gandengyan_fmt.setOnClickListener(boomOnClickListener);
+        iv_add_gandengyan_fmt.setOnClickListener(boomOnClickListener);
+        tv_boom_gandengyan_fmt.setOnClickListener(boomOnClickListener);
 
     }
 
-    class PopupItemOnClickListener implements View.OnClickListener {
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+
+    }
+
+    /**
+     * 属性得分表数据
+     */
+    @Override
+    public void updateScore() {
+        // 刷新总分
+
+        for (int i = 0; i < playerListSize; i++) {
+            rv_namelist_gandengyan_fmt.getAdapter().notifyItemChanged(i);
+        }
+        // 刷新得分表
+        rv_scorelist_gandengyan_fmt.getAdapter().notifyDataSetChanged();
+        // 清除得分和手牌数后刷新
+        rv_gandengyan_fmt.getAdapter().notifyDataSetChanged();
+        // 重置赢家
+        winnerPosition = -1;
+        // 重置炸弹
+        boom = -1;
+        setBoom();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        PokerApplication.realmGameInfo = null;
+    }
+
+    class BoomOnClickListener implements View.OnClickListener {
+
         @Override
         public void onClick(View v) {
+            int oldBoom = boom;
             switch (v.getId()) {
-                case R.id.b_0_popup:
-                    ToastUtils.getToast(mContext,"0000000XX");
-
-                    popup.dismiss();
+                case R.id.tv_boom_gandengyan_fmt:
+                    boom = -1;
                     break;
-                case R.id.b_1_popup:
+                case R.id.iv_add_gandengyan_fmt:
+                    boom -= 1;
                     break;
-                case R.id.b_2_popup:
-                    break;
-                case R.id.b_3_popup:
-                    break;
-                case R.id.b_4_popup:
-                    break;
-                case R.id.b_5_popup:
+                case R.id.iv_minus_gandengyan_fmt:
+                    if (boom == -1) return;
+                    boom += 1;
                     break;
             }
+            setBoom();
+            setScore(oldBoom);
         }
     }
 
-    interface RemainCallback {
-        String getScore();
+    /**
+     * 设置炸弹
+     */
+    public void setBoom() {
+        if (boom == -1) {
+            tv_boom_gandengyan_fmt.setText("无");
+        } else {
+            tv_boom_gandengyan_fmt.setText((-boom + ""));
+        }
     }
+
+    /**
+     * 改变炸弹倍数后，刷新得分
+     */
+    public void setScore(int oldBoom) {
+        for (RealmPlayerScoreInfo info : PokerApplication.realmRoundInfo.getPlayerScoreList()) {
+            // 新的得分 = 旧的得分 / 旧的倍数 * 新的倍数
+            info.setScore(Integer.parseInt(info.getScore()) / oldBoom * boom + "");
+        }
+        rv_gandengyan_fmt.getAdapter().notifyDataSetChanged();
+
+        // 换种方式 增加更新动画
+        /*
+        for (int i = 0; i < playerListSize; i++) {
+            RealmPlayerScoreInfo info = PokerApplication.realmRoundInfo.getPlayerScoreList().get(i);
+            info.setScore(Integer.parseInt(info.getScore()) / oldBoom * boom + "");
+            rv_gandengyan_fmt.getAdapter().notifyItemChanged(i);
+        }
+        */
+
+    }
+
 }

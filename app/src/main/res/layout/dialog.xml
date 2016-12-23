@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/ll_home_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/dialog_background"
+        android:padding="30dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="6dp"
+            android:text="名称："
+            android:textColor="@color/colorBlack"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/et_home_dialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/editview_bg"
+            android:hint="请输入名称"
+            android:imeOptions="actionDone"
+            android:padding="3dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <Button
+        android:textColor="@color/button_text_color"
+        android:background="@drawable/button"
+        android:textSize="18sp"
+        android:id="@+id/b_home_dialog"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:layout_alignBottom="@id/ll_home_dialog"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:text="增加" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="36dp"
+        android:text="新增玩家"
+        android:textColor="@color/colorBlack"
+        android:textSize="24sp" />
+
+    <ImageView
+        android:id="@+id/iv_home_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_highlight_off_pink_a200_48dp" />
+
+</RelativeLayout>

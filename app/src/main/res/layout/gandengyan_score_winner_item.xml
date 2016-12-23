@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_score_item_gandengyan"
+    style="@style/tv_gandengyan_recycler_header"
+    android:layout_width="80dp"
+    android:layout_height="wrap_content"
+    android:background="#ffabc7"
+    android:gravity="center"
+    android:text="赢的分"
+    android:textColor="@color/colorWhite" />

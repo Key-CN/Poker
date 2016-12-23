@@ -44,4 +44,9 @@ public interface IPokerDataSource {
      * @param callback 用户刷新界面的回调数据
      */
     void deletePlayers(@NonNull LoadPlayersCallback callback);
+
+    /**
+     * 保存一局游戏,在整一盘游戏中
+     */
+    void saveRoundOnGame();
 }

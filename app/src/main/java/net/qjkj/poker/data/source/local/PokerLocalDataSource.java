@@ -58,7 +58,7 @@ public class PokerLocalDataSource implements IPokerDataSource {
                     RealmResults<RealmPlayerInfo> realmPlayerInfos = realm.where(RealmPlayerInfo.class).findAll();
                     if (realmPlayerInfos.isEmpty()) {
                         for (int i = 0; i < 4; i++) {
-                            copyRealmPlayerInfos.add(new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), "选手" + i));
+                            copyRealmPlayerInfos.add(new RealmPlayerInfo("选手" + i));
                         }
                         realm.insert(copyRealmPlayerInfos);
                     } else {
@@ -87,7 +87,7 @@ public class PokerLocalDataSource implements IPokerDataSource {
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    RealmPlayerInfo realmPlayerInfo = new RealmPlayerInfo(PokerApplication.playerInfoPrimaryKeyValue.incrementAndGet(), playerName);
+                    RealmPlayerInfo realmPlayerInfo = new RealmPlayerInfo(playerName);
                     realm.insert(realmPlayerInfo);
                     copyRealmPlayerInfos.add(realmPlayerInfo);
                 }
@@ -119,18 +119,24 @@ public class PokerLocalDataSource implements IPokerDataSource {
     public void deletePlayers(@NonNull LoadPlayersCallback callback) {
         checkNotNull(callback);
 
+        int size = PokerApplication.checkedPlayerList.size();
+        final String[] names = new String[size];
+        for (int i = 0; i < size; i++) {
+            names[i] = PokerApplication.checkedPlayerList.get(i).getPlayerName();
+        }
+
         // 从数据库中删除,先拿实例
         try (Realm mRealm = Realm.getDefaultInstance()) {
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    RealmResults<RealmPlayerInfo> players = realm.where(RealmPlayerInfo.class).in("playerName", PokerApplication.realmRoundInfo.getPlayerNameArray()).findAll();
-                    players.deleteAllFromRealm();
-                    ToastUtils.getToast(mContext, Arrays.toString(PokerApplication.realmRoundInfo.getPlayerNameArray()) + "  已删除");
+                    boolean b = realm.where(RealmPlayerInfo.class).in("playerName", names).findAll().deleteAllFromRealm();
+                    ToastUtils.getToast(mContext, Arrays.toString(names) + (b ? "  已删除" : "  删除失败"));
                 }
             });
         }
-        copyRealmPlayerInfos.removeAll(PokerApplication.realmRoundInfo.getRealmPlayerInfoList());
+        copyRealmPlayerInfos.removeAll(PokerApplication.checkedPlayerList);
+        PokerApplication.checkedPlayerList.clear();
         callback.onPlayersLoaded(copyRealmPlayerInfos);
 /*        try {
             mRealm.beginTransaction();
@@ -156,6 +162,25 @@ public class PokerLocalDataSource implements IPokerDataSource {
         // 把全部选手的list放进回调
 //        playerInfoList.clear();
 //        getPlayers(callback);
+    }
+
+    /**
+     * 保存一局游戏,在整一盘游戏中
+     */
+    @Override
+    public void saveRoundOnGame() {
+        try (Realm realm = Realm.getDefaultInstance()) {
+            if (PokerApplication.realmGameInfo.getGameId() == -1) {
+                PokerApplication.realmGameInfo.setGameId(System.currentTimeMillis());
+            }
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.insertOrUpdate(PokerApplication.realmGameInfo);
+                    Logger.d(PokerApplication.realmGameInfo.toString());
+                }
+            });
+        }
     }
 
 }

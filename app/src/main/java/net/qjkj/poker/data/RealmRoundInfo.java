@@ -16,12 +16,24 @@ import io.realm.annotations.PrimaryKey;
 public class RealmRoundInfo extends RealmObject {
 
     @PrimaryKey
-    private long roundId;
+    private long roundId; // 用time做主键
 
-
-    private RealmList<RealmPlayerInfo> realmPlayerInfoList = new RealmList<>();
+    private RealmList<RealmPlayerScoreInfo> playerScoreList = new RealmList<>();
 
     public RealmRoundInfo() {
+    }
+
+    public RealmRoundInfo(RealmList<RealmPlayerInfo> playerInfos) {
+        for (RealmPlayerInfo realmPlayerInfo : playerInfos) {
+            playerScoreList.add(new RealmPlayerScoreInfo(realmPlayerInfo.getPlayerName()));
+        }
+    }
+
+    public RealmRoundInfo(RealmList<RealmPlayerInfo> playerInfos, long roundId) {
+        for (RealmPlayerInfo realmPlayerInfo : playerInfos) {
+            playerScoreList.add(new RealmPlayerScoreInfo(realmPlayerInfo.getPlayerName()));
+        }
+        this.roundId = roundId;
     }
 
     public long getRoundId() {
@@ -32,40 +44,32 @@ public class RealmRoundInfo extends RealmObject {
         this.roundId = roundId;
     }
 
-    public List<RealmPlayerInfo> getRealmPlayerInfoList() {
-        return realmPlayerInfoList;
-    }
-
-    public void setRealmPlayerInfoList(RealmList<RealmPlayerInfo> realmPlayerInfoList) {
-        this.realmPlayerInfoList = realmPlayerInfoList;
-    }
-
-    public void addPlayerInfo(RealmPlayerInfo realmPlayerInfo) {
-        realmPlayerInfoList.add(realmPlayerInfo);
-    }
-
-    public void removePlayerInfo(RealmPlayerInfo realmPlayerInfo) {
-        realmPlayerInfoList.remove(realmPlayerInfo);
-    }
-
-    public void removeAll() {
-        realmPlayerInfoList.clear();
+    public List<RealmPlayerScoreInfo> getPlayerScoreList() {
+        return playerScoreList;
     }
 
     public List<String> getPlayerNameList() {
         List<String> names = new ArrayList<>();
-        for (RealmPlayerInfo realmPlayerInfo : realmPlayerInfoList) {
+        for (RealmPlayerScoreInfo realmPlayerInfo : playerScoreList) {
             names.add(realmPlayerInfo.getPlayerName());
         }
         return names;
     }
 
     public String[] getPlayerNameArray() {
-        int size = realmPlayerInfoList.size();
+        int size = playerScoreList.size();
         String[] names = new String[size];
         for (int i = 0; i < size; i++) {
-            names[i] = realmPlayerInfoList.get(i).getPlayerName();
+            names[i] = playerScoreList.get(i).getPlayerName();
         }
         return names;
+    }
+
+    @Override
+    public String toString() {
+        return "RealmRoundInfo{" +
+                "roundId=" + roundId +
+                ", 每个选手：" + playerScoreList.toString() +
+                '}';
     }
 }

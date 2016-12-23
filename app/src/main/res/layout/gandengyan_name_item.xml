@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tv_name_item_gandengyan"
-    android:layout_width="80dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="三个汉字"
-    android:gravity="center"
-    style="@style/tv_gandengyan_recycler_header"
-    />
+    android:orientation="vertical"
+    >
+
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tv_name_item_gandengyan"
+        style="@style/tv_gandengyan_recycler_header"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="选手名" />
+    <TextView
+        android:id="@+id/tv_total_item_gandengyan"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="赢总分"
+        android:gravity="center"
+        android:background="#FF4081"
+        style="@style/tv_gandengyan_recycler_header"
+        android:textColor="@color/colorWhite"
+        />
+
+</LinearLayout>
