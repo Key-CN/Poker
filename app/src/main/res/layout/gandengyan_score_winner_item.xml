@@ -4,7 +4,7 @@
     style="@style/tv_gandengyan_recycler_header"
     android:layout_width="80dp"
     android:layout_height="wrap_content"
-    android:background="#ffabc7"
+    android:background="#ffaaad"
     android:gravity="center"
     android:text="赢的分"
     android:textColor="@color/colorWhite" />

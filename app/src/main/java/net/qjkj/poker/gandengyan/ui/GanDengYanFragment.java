@@ -105,6 +105,18 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // popup 填充
+        // View popupContent = LayoutInflater.from(mContext).inflate(R.layout.gandengyan_popup, null);
+        popupContent = View.inflate(mContext, R.layout.gandengyan_popup, null);
+
+        // MATCH_PARENT = -1;   WRAP_CONTENT = -2; 所有的LayoutParams都继承于ViewGroup
+        // 如果PopupWindow中有Editor的话，focusable要为true。
+        popup = new PopupWindow(popupContent, -2, -2, true);
+        popup.setTouchable(true);
+        popup.setOutsideTouchable(true);
+        popup.setBackgroundDrawable(new ColorDrawable(0));
+
+
         // 计算分数的Recycler填充
         rv_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext));
         // adapter
@@ -145,7 +157,8 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
                                 popup.dismiss();
                                 break;
                             default:
-                                popup.showAsDropDown(v);
+                                // 用向下弹减去自身高度和锚点高度。等于向上弹。但是第一次还是向下弹的，已经把popupContent在本方法上方初始化了。还是这样
+                                popup.showAsDropDown(v, 0, (-popupContent.getHeight() - v.getHeight()));
                                 // 从内部创建监听器，这样可以直接使用holder
                                 // 由于运行顺序的问题。监听器在这里才赋值成功，只能在这里设置监听器
                                 // popup 的监听器
@@ -208,23 +221,18 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
                 // 显示得分
                 holder.setText(R.id.tv_score_gandengyan_recycler_item, PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getScore());
 
+                // 不能用 player.getScore() 代替 PokerApplication.realmRoundInfo.getPlayerScoreList().get(position).getScore()
+                // player 是老的数据源
+                // PokerApplication.realmRoundInfo.getPlayerScoreList().get(position) 是最新的数据源
+                // 不能生效，是传进来的数据源的问题。因为这个CommonAdapter并没有写更新数据源的方法，所以要简化代码还是要自己写一个adapter
             }
         });
 
 
-        // popup 填充
-        // View popupContent = LayoutInflater.from(mContext).inflate(R.layout.gandengyan_popup, null);
-        popupContent = View.inflate(mContext, R.layout.gandengyan_popup, null);
-
-        // MATCH_PARENT = -1;   WRAP_CONTENT = -2; 所有的LayoutParams都继承于ViewGroup
-        // 如果PopupWindow中有Editor的话，focusable要为true。
-        popup = new PopupWindow(popupContent, -2, -2, true);
-        popup.setTouchable(true);
-        popup.setOutsideTouchable(true);
-        popup.setBackgroundDrawable(new ColorDrawable(0));
-
         // 得分表名字 填充
         rv_namelist_gandengyan_fmt.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
+        // 添加分割线     public static final int HORIZONTAL = 0; public static final int VERTICAL = 1;
+        rv_namelist_gandengyan_fmt.addItemDecoration(new DividerItemDecoration(mContext, 0));
         rv_namelist_gandengyan_fmt.setAdapter(new CommonAdapter<RealmPlayerScoreInfo>(mContext, R.layout.gandengyan_name_item, PokerApplication.realmGameInfo.getRealmRoundInfoList().get(0).getPlayerScoreList()) {
             @Override
             protected void convert(ViewHolder holder, RealmPlayerScoreInfo realmPlayerScoreInfo, int position) {
@@ -243,12 +251,14 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
         // 得分表分数的adapter
         rv_scorelist_gandengyan_fmt.setAdapter(new ScoreAdapterN(mContext));  // 无悬停头
 
-/*        ScoreAdapterX scoreAdapterX = new ScoreAdapterX(mContext);
+        /*
+        ScoreAdapterX scoreAdapterX = new ScoreAdapterX(mContext);
         StickyHeaderDecoration stickyHeaderDecoration = new StickyHeaderDecoration(scoreAdapterX);
         LRecyclerViewAdapter lRecyclerViewAdapter = new LRecyclerViewAdapter(scoreAdapterX);
 
         rv_scorelist_gandengyan_fmt.setAdapter(lRecyclerViewAdapter);
-        rv_scorelist_gandengyan_fmt.addItemDecoration(stickyHeaderDecoration);*/
+        rv_scorelist_gandengyan_fmt.addItemDecoration(stickyHeaderDecoration);
+        */
 
 
         // b_save_gandengyan_fmt 保存按钮监听
@@ -280,19 +290,24 @@ public class GanDengYanFragment extends BaseFragment implements IGanDengYanContr
     }
 
     /**
-     * 属性得分表数据
+     * 刷新得分表数据
      */
     @Override
     public void updateScore() {
-        // 刷新总分
-
-        for (int i = 0; i < playerListSize; i++) {
+        // 动画效果感觉像卡顿。放弃
+/*        for (int i = 0; i < playerListSize; i++) {
+            // 刷新总分
             rv_namelist_gandengyan_fmt.getAdapter().notifyItemChanged(i);
-        }
-        // 刷新得分表
-        rv_scorelist_gandengyan_fmt.getAdapter().notifyDataSetChanged();
+            // 清除得分和手牌数后刷新
+            rv_gandengyan_fmt.getAdapter().notifyItemChanged(i);
+        }*/
+
+        // 刷新总分
+        rv_namelist_gandengyan_fmt.getAdapter().notifyDataSetChanged();
         // 清除得分和手牌数后刷新
         rv_gandengyan_fmt.getAdapter().notifyDataSetChanged();
+        // 刷新得分表
+        rv_scorelist_gandengyan_fmt.getAdapter().notifyDataSetChanged();
         // 重置赢家
         winnerPosition = -1;
         // 重置炸弹
