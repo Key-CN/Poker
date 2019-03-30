@@ -1,17 +1,14 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "net.qjkj.poker"
-        minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.AppVersionCode
+        versionName rootProject.ext.AppVersionName
     }
     buildTypes {
         release {
@@ -22,31 +19,27 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.1.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$supportVersion"
     //design
-    compile 'com.android.support:design:25.1.0'
+    implementation "com.android.support:design:$supportVersion"
     //v4
-    compile 'com.android.support:support-v4:25.1.0'
+    implementation "com.android.support:support-v4:$supportVersion"
 
     // dagger2 dependencies
-    compile 'com.google.dagger:dagger:2.8'
-    apt 'com.google.dagger:dagger-compiler:2.8'
-    provided 'javax.annotation:jsr250-api:1.0'
+    implementation 'com.google.dagger:dagger:2.8'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
+    compileOnly 'javax.annotation:jsr250-api:1.0'
 
     //logger dependencies
-    compile 'com.orhanobut:logger:1.15'
+    implementation 'com.orhanobut:logger:2.2.0'
 
-    //butter knife 不能用annotationProcessor会空指针异常，绑定不了ID  只能用apt
-    compile 'com.jakewharton:butterknife:8.4.0'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    // ButterKnife
+    implementation "com.jakewharton:butterknife:$butterknifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$butterknifeVersion"
 
     // base-adapter ForRecyclerView
-    compile 'com.zhy:base-rvadapter:3.0.3'
+    implementation 'com.zhy:base-rvadapter:3.0.3'
     // ForListView
-    compile 'com.zhy:base-adapter:3.0.3'
+    implementation 'com.zhy:base-adapter:3.0.3'
 }
