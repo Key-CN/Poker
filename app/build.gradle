@@ -2,6 +2,16 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file(KEY_STORE)
+            storePassword KEY_PASSWORD
+            keyAlias KEY_ALIATS
+            keyPassword KEY_PASSWORD
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "net.qjkj.poker"
@@ -9,35 +19,35 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.AppVersionCode
         versionName rootProject.ext.AppVersionName
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.android.support:appcompat-v7:$supportVersion"
     //design
     implementation "com.android.support:design:$supportVersion"
     //v4
     implementation "com.android.support:support-v4:$supportVersion"
-
     // dagger2 dependencies
     implementation 'com.google.dagger:dagger:2.8'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
     compileOnly 'javax.annotation:jsr250-api:1.0'
-
     //logger dependencies
     implementation 'com.orhanobut:logger:2.2.0'
-
     // ButterKnife
     implementation "com.jakewharton:butterknife:$butterknifeVersion"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterknifeVersion"
-
     // base-adapter ForRecyclerView
     implementation 'com.zhy:base-rvadapter:3.0.3'
     // ForListView
